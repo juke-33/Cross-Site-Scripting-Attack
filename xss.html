@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerable XSS Site</title>
+</head>
+<body>
+    <!-- Search Section -->
+    <h2>Search Section</h2>
+    <form id="searchForm" action="" method="GET">
+        <input type="text" id="search" name="search" placeholder="Search..."><br><br>
+        <button type="submit">Search</button>
+    </form>
+    <p id="searchResult"></p>
+    <hr>
+
+    <!-- Comment Section -->
+    <h2>Comment Section</h2>
+    <form id="commentForm">
+        <textarea id="comment" rows="4" cols="50" placeholder="Enter your comment..."></textarea><br><br>
+        <button type="button" onclick="submitComment()">Comment</button>
+    </form><br>
+    <div id="commentSection"></div>
+    <hr>
+
+    <!-- Cookie Management Section -->
+    <h2>Cookie Management</h2>
+    <button onclick="setCookie()">Set Cookie</button>
+    <button onclick="showCookie()">Show Cookie</button>
+    <button onclick="deleteCookie()">Delete Cookie</button>
+    <p id="cookieDisplay"></p>
+
+    <script>
+        // Function for submitting comments
+        function submitComment() {
+            var comment = document.getElementById('comment').value;
+            var commentDiv = document.createElement('div');
+            commentDiv.innerHTML = "<strong>User:</strong> " + comment;
+            document.getElementById('commentSection').appendChild(commentDiv);
+            document.getElementById('comment').value = '';
+        }
+
+        // Function to handle the search query from the URL
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('search')) {
+            const searchQuery = params.get('search');
+            console.log("Search query:", searchQuery);
+            document.getElementById('searchResult').innerHTML = `<strong>Searched:</strong> ${searchQuery}`;
+        }
+
+        // Cookie Management Functions
+        function setCookie() {
+            const d = new Date();
+            d.setTime(d.getTime() + (24*60*60*1000));
+            let expires = "expires="+ d.toUTCString();
+            const randomHex = Math.random().toString(16).substr(2, 10);
+            document.cookie = "userCookie=" + randomHex + "; " + expires + "; path=/";
+            document.getElementById('cookieDisplay').innerHTML = "Cookie has been set.";
+        }
+
+        function showCookie() {
+            const name = "userCookie=";
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            let cookieValue = "No cookie found!";
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i].trim();
+                if (c.indexOf(name) == 0) {
+                    cookieValue = c.substring(name.length, c.length);
+                }
+            }
+            document.getElementById('cookieDisplay').innerHTML = "Cookie Value: " + cookieValue;
+        }
+
+        function deleteCookie() {
+            document.cookie = "userCookie=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.getElementById('cookieDisplay').innerHTML = "Cookie has been deleted!";
+        }
+    </script>
+</body>
+</html>
